@@ -5,12 +5,14 @@ import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { APP_ROUTES } from '@/config';
 import connectDB from '@/middlewares/db_config';
-import { validate } from '@/utils/validate';
+// import { MongoDBAdapter } from '@next-auth/mongodb-adapter';
+// import clientPromise from '@/middlewares/next-auth-mongodb-adapter';
 const Users = require('@/models/user_model');
 const production = process.env.PROD_ENV === 'production';
 
 export default NextAuth({
 	secret: process.env.AUTH_SECRET,
+	// adapter: MongoDBAdapter(clientPromise),
 	providers: [
 		GoogleProvider({
 			clientId: process.env.GOOGLE_ID,
@@ -28,39 +30,24 @@ export default NextAuth({
 			},
 		}),
 		CredentialsProvider({
+			credentials: {
+				username: { label: 'Username', type: 'text', placeholder: 'jsmith' },
+				password: { label: 'Password', type: 'password' },
+			},
 			async authorize(credentials, req) {
-				const { contact, username, password, lastname, firstname, isRegister, isLogin } = { ...credentials };
+				const authResponse = await fetch('/api/auth/login', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(credentials),
+				});
 
-				let email, phone;
-				if (validate.email({ email: contact }).isValid) email = contact;
-				if (Number(contact)) phone = contact;
+				if (!authResponse.ok) return null;
 
-				await connectDB();
+				const user = await authResponse.json();
 
-				console.log({ email, phone });
-
-				if (isLogin) {
-					const emailUser = await Users.findOne({ email }).select('-password');
-					const phoneUser = await Users.findOne({ mobile: phone }).select('-password');
-					if (emailUser || phoneUser) return emailUser || phoneUser;
-					return false;
-				}
-				if (isRegister) {
-					const userData = {
-						username,
-						email,
-						phone,
-						password,
-						lastname,
-						firstname,
-						sign_up_method: 'cedentials',
-					};
-					const newUser = new Users(userData);
-					const newUserData = await newUser.save();
-
-					return newUserData;
-				}
-				return false;
+				return user;
 			},
 		}),
 	],

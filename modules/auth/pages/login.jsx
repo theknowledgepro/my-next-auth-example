@@ -9,21 +9,38 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { APP_ROUTES, SITE_DATA, LOADING } from '@/config';
 import { isLoading } from '@/utils/get_loading_state';
 import AuthLayout from '../components/layout';
 import styles from './styles.module.css';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import GoogleButton from '../components/google';
+import { GLOBALTYPES } from '@/redux/types';
 
-const Login = ({ handleLoginWithGoogle, handleLoginWithCredentials, logoUrl }) => {
+const Login = ({ redirectProps, handleLoginWithGoogle, handleLoginWithCredentials, logoUrl }) => {
 	const { loading: loadingStore, redirect } = useSelector((state) => state);
-
+	const dispatch = useDispatch();
 	// ** PUSH 'redirectProps' TO REDIRECT STORE FOR AUTO NAVIGATION ON USER AUTH
+	useEffect(() => {
+		if (!redirectProps) return;
+		Object.keys(redirectProps).includes('redirectUrl') &&
+			dispatch({
+				type: GLOBALTYPES.REDIRECT,
+				payload: { url: redirectProps?.redirectUrl.trim() },
+			});
+		Object.keys(redirectProps).includes('redirectUrl') &&
+			dispatch({
+				type: GLOBALTYPES.TOAST,
+				payload: {
+					info: 'Please login to continue!',
+					title: 'Hey there!',
+				},
+			});
+	}, [redirectProps]);
 
-	const [userData, setUserData] = React.useState({ email: '', password: '' });
-	const { email, password } = userData;
+	const [userData, setUserData] = React.useState({ contact: '', password: '' });
+	const { contact, password } = userData;
 	const [typePass, setTypePass] = React.useState(false);
 
 	const handleChangeInput = (e) => {
@@ -38,27 +55,28 @@ const Login = ({ handleLoginWithGoogle, handleLoginWithCredentials, logoUrl }) =
 
 	const handleSubmit = () => {
 		setErrors({
-			email: !email && 'Please enter your email.',
+			contact: !contact && 'Please enter your email or phone number.',
 			password: !password && 'Please enter your password.',
 		});
-		if (errors.email || errors.password || !email || !password) return;
+		if (!contact || !password) return;
 		if (isLoading(LOADING.LOGIN, loadingStore)) return;
-		//handleLoginWithCredentials({ email, password });
+		dispatch({ type: GLOBALTYPES.LOADING, payload: { [LOADING.LOGIN]: true } });
+		dispatch({ type: GLOBALTYPES.TOAST, payload: { loading: 'Signing you in...' } });
+		handleLoginWithCredentials({ contact, password });
 	};
 
 	return (
 		<AuthLayout metatags={{ meta_title: `Login | ${SITE_DATA.OFFICIAL_NAME}` }} pageTitle={'Sign In to Your Account!'} logoUrl={logoUrl}>
 			<TextField
 				onChange={handleChangeInput}
-				defaultValue={email}
+				defaultValue={contact}
 				color='primary'
-				className='w-full'
-				style={{ margin: '10px 0' }}
-				name='email'
-				label='Email Address'
+				className='w-full mt-5'
+				name='contact'
+				label='Email Address or Phone Number'
 				variant='standard'
-				helperText={errors.email}
-				error={errors.email ? true : false}
+				helperText={errors.contact}
+				error={errors.contact ? true : false}
 				InputProps={{
 					startAdornment: (
 						<InputAdornment position='start'>
@@ -71,8 +89,7 @@ const Login = ({ handleLoginWithGoogle, handleLoginWithCredentials, logoUrl }) =
 			<TextField
 				onChange={handleChangeInput}
 				defaultValue={password}
-				className='w-full'
-				style={{ margin: '10px 0' }}
+				className='w-full mt-5'
 				color='primary'
 				name='password'
 				label='Password'

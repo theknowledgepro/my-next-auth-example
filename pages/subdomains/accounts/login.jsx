@@ -4,17 +4,23 @@ import { signIn } from 'next-auth/react';
 import { Login } from '@/modules/auth';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import { useSession } from 'next-auth/react';
 import { APP_ROUTES, MEMBER_ROLES } from '@/config';
 
-export default function LoginPage() {
-	const handleLoginWithCredentials = ({ email, password }) => signIn('credentials', { email, password });
+export default function LoginPage({ redirectProps }) {
+	const handleLoginWithCredentials = ({ contact, password }) => signIn('credentials', { contact, password, isLogin: true });
 	const handleLoginWithGoogle = () => signIn('google');
 
-	return <Login handleLoginWithCredentials={handleLoginWithCredentials} handleLoginWithGoogle={handleLoginWithGoogle} logoUrl={''} />;
+	return (
+		<Login
+			redirectProps={redirectProps}
+			handleLoginWithCredentials={handleLoginWithCredentials}
+			handleLoginWithGoogle={handleLoginWithGoogle}
+			logoUrl={''}
+		/>
+	);
 }
 
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps({ req, res, query }) {
 	const session = await getServerSession(req, res, authOptions);
 	if (session)
 		return {
@@ -28,6 +34,6 @@ export async function getServerSideProps({ req, res }) {
 		};
 
 	return {
-		props: {},
+		props: { redirectProps: query },
 	};
 }

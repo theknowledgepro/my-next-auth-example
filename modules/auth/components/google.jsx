@@ -14,8 +14,8 @@ const GoogleButton = ({ handleLoginWithGoogle }) => {
 		handleLoginWithGoogle();
 	};
 	return (
-		<div className='w-full flex flex-col items-center justify-center' style={{ margin: '20px 0 0' }}>
-			<Divider style={{ margin: '10px', width: '100%' }} />
+		<div className='w-full flex flex-col items-center justify-center mt-5'>
+			<Divider className='my-3 w-full' />
 			<div className='text-gray-400 fs-12 text-center'>or sign in with</div>
 			<Button
 				onClick={handleClick}
@@ -24,7 +24,7 @@ const GoogleButton = ({ handleLoginWithGoogle }) => {
 					width: '40px',
 					height: '40px',
 					padding: 0,
-					margin:'5px 0 0',
+					margin: '5px 0 0',
 					minWidth: '10px',
 					borderRadius: '50%',
 				}}

@@ -46,7 +46,7 @@ export async function getServerSideProps({ req, res }) {
 
 	return {
 		props: {
-			session: { ...session, user: { ...session?.user, ...userData?.user } },
+			session: JSON.parse(JSON.stringify({ ...session, user: { ...session?.user, ...userData?.user } })),
 		},
 	};
 }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import Toast from '@/modules/toast';
 
 const PersistLayout = ({ children }) => {
 	const { auth, toast, redirect } = useSelector((state) => state);
@@ -19,7 +20,12 @@ const PersistLayout = ({ children }) => {
 		}
 	}, [auth.token, redirect?.url]);
 
-	return <React.Fragment>{children}</React.Fragment>;
+	return (
+		<React.Fragment>
+			{(toast.success || toast.info || toast.error || toast.warning || toast.loading) && <Toast />}
+			{children}
+		</React.Fragment>
+	);
 };
 
 export default PersistLayout;
