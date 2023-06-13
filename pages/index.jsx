@@ -72,7 +72,7 @@ export default function Login() {
 						disabled={loading}
 						onClick={() => {
 							setLoading(true);
-							signIn('google');
+							signIn('email', { email: 'promisedera@officehotspot.com' });
 						}}
 						className={`${
 							loading ? 'cursor-not-allowed bg-gray-600' : 'bg-black'

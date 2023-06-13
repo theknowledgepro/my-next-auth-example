@@ -2,8 +2,8 @@
  * @format
  * @type {import('next').NextConfig}
  */
-const domain = process.env.DOMAIN;
-const dev_domain = process.env.DEV_DOMAIN;
+const domain = process.env.NEXT_PUBLIC_DOMAIN;
+const dev_domain = process.env.NEXT_PUBLIC_DEV_DOMAIN;
 
 const accounts = process.env.SUBDOMAIN_ACCOUNTS;
 const admin = process.env.SUBDOMAIN_ADMIN;
@@ -11,6 +11,9 @@ const admin = process.env.SUBDOMAIN_ADMIN;
 const production = process.env.PROD_ENV === 'production';
 
 const nextConfig = {
+	images: {
+		domains: ['res.cloudinary.com', 'lh3.googleusercontent.com'],
+	},
 	reactStrictMode: true,
 	async rewrites() {
 		return {
@@ -20,7 +23,7 @@ const nextConfig = {
 					has: [
 						{
 							type: 'host',
-							value: production ? `${accounts}.${domain}` : `${accounts}.${dev_domain}`,
+							value: production ? `https://${accounts}.${domain}` : `${accounts}.${dev_domain}`,
 						},
 					],
 					destination: '/subdomains/accounts/:path*',
@@ -30,7 +33,7 @@ const nextConfig = {
 					has: [
 						{
 							type: 'host',
-							value: production ? `${admin}.${domain}` : `${admin}.${dev_domain}`,
+							value: production ? `https://${admin}.${domain}` : `${admin}.${dev_domain}`,
 						},
 					],
 					destination: '/subdomains/admin/:path*',
@@ -45,10 +48,10 @@ const nextConfig = {
 				has: [
 					{
 						type: 'host',
-						value: production ? `${domain}` || `www.${domain}` : `${dev_domain}`,
+						value: production ? `https://${domain}` || `https://www.${domain}` : `${dev_domain}`,
 					},
 				],
-				destination: production ? `${accounts}.${domain}/:path*` : `${accounts}.${dev_domain}/:path*`,
+				destination: production ? `https://${accounts}.${domain}/:path*` : `${accounts}.${dev_domain}/:path*`,
 				permanent: true,
 			},
 
@@ -57,10 +60,10 @@ const nextConfig = {
 				has: [
 					{
 						type: 'host',
-						value: production ? `${domain}` || `www.${domain}` : `${dev_domain}`,
+						value: production ? `https://${domain}` || `https://www.${domain}` : `${dev_domain}`,
 					},
 				],
-				destination: production ? `${admin}.${domain}/:path*` : `${admin}.${dev_domain}/:path*`,
+				destination: production ? `https://${admin}.${domain}/:path*` : `${admin}.${dev_domain}/:path*`,
 				permanent: true,
 			},
 		];
